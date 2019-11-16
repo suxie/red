@@ -1,0 +1,16 @@
+{
+  "name": "finalproject",
+  "version": "1.0.0",
+  "description": "CIS197 Final Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Susan Xie",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.7.2",
+    "express": "^4.17.1",
+    "three-orbitcontrols": "^2.110.1"
+  }
+}
