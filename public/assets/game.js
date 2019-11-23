@@ -27,7 +27,7 @@ function createScene() {
     sceneWidth = window.innerWidth;
     sceneHeight = window.innerHeight;
 		scene = new THREE.Scene();//the 3d scene
-		scene.fog = new THREE.FogExp2(0x462E5E, 0.0015);
+		scene.fog = new THREE.Fog(0x1C2F2F, -8, -20);
     camera = new THREE.PerspectiveCamera( 75, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
     renderer = new THREE.WebGLRenderer({alpha:true});//renderer with transparent backdrop
     renderer.shadowMap.enabled = true;//enable shadow
@@ -94,7 +94,7 @@ function createScene() {
 	sun.shadow.mapSize.width = 256;
 	sun.shadow.mapSize.height = 256;
 	sun.shadow.camera.near = 0.5;
-	sun.shadow.camera.far = 90 ;
+	sun.shadow.camera.far = 90;
 	
 	var helper = new THREE.DirectionalLight(0x7B68EE, 0.8);
 	helper.position.set(0, 0, 1.0);
@@ -143,29 +143,36 @@ function update() { // animate
 			jump = 0.0;
 			tick = 0.0;
 		}
+
+		// ground.rotation.x += 0.01;
 		if (clockTick % plantRate === 0.0) {
 			if(plantRate > 400) {
 				plantRate -= 10;
 			}
 			var tree = plant();
+			tree.position.x = Math.random() * 2 - 1;
+			tree.position.y = -0.4;
+			tree.position.z = -20;
 			trees.push(tree);
-		  tree.position.z = sceneWidth - 5;
-			tree.position.y = 0.0;
-			tree.position.x = Math.random() * (sceneWidth - 100) + 50;
 			ground.add(tree);
-			if (trees.length > 6) {
-				ground.remove(tree);
+		}
+
+		for (var i = 0; i < trees.length; i++) {
+			trees[0].position.z += 0.025;
+			if (trees[i].position.z > 5) {
+				ground.remove(trees[i]);
 				trees.shift();
-			} 
+			}
 		}
 		ground.updateMatrixWorld(true);
 		box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
+		
 		render();
 	requestAnimationFrame(update); //request next update
 }
 
 function plant() {
-	var treeGeom = new THREE.ConeGeometry(0.5, 1, 8, 6);
+	var treeGeom = new THREE.ConeGeometry(0.75, 3.5, 8, 6);
 	var treeMat = new THREE.MeshStandardMaterial({ color: 0x008080, shading:THREE.FlatShading });
 	var tree = new THREE.Mesh(treeGeom, treeMat);
 	console.log("planting tree")
