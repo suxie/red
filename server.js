@@ -1,7 +1,6 @@
 var express = require('express');
 
 var app = express()
-// instantiate a mongoose connect call
 
 // set the express view engine to take care of ejs within html files
 app.engine('html', require('ejs').__express)

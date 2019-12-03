@@ -13,6 +13,8 @@ var tick = 0.0;
 var clockTick = 0.0;
 var plantRate = 600;
 var trees = [];
+var endgame = false;
+var score = 0;
 
 init();
 function init() {
@@ -158,7 +160,13 @@ function update() { // animate
 		}
 
 		for (var i = 0; i < trees.length; i++) {
-			trees[0].position.z += 0.025;
+			trees[i].position.z += 0.025;
+
+			if (Math.abs(trees[i].position.x - player.position.x) <= 0.75 &&
+				Math.abs(trees[i].position.z - player.position.z) <= 0.75) {
+					endgame = true;
+				}
+
 			if (trees[i].position.z > 5) {
 				ground.remove(trees[i]);
 				trees.shift();
@@ -168,7 +176,10 @@ function update() { // animate
 		box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
 		
 		render();
-	requestAnimationFrame(update); //request next update
+	if (!endgame) {
+		requestAnimationFrame(update);
+	}
+	 //request next update
 }
 
 function plant() {
