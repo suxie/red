@@ -105,6 +105,23 @@ function createScene() {
 
 	var ambient = new THREE.AmbientLight(0x483D8B, 0.75);
 	scene.add(ambient);
+
+	var loader = new THREE.FontLoader();
+
+  loader.load( '/public/assets/helvetiker_bold.typeface.json', function ( font ) {
+		var textGeo = new THREE.TextGeometry( 'HELLO', {
+			font: font,
+			size: 80,
+			height: 5,
+			curveSegments: 12,
+			bevelEnabled: false,
+	});
+	var textMaterial = new THREE.MeshLambertMaterial();
+	var text = new THREE.Mesh(textGeo, textMaterial);
+	text.position.set(0, 0.75, 4);
+	scene.add(text);
+
+});
   	
 	window.addEventListener('resize', onWindowResize, false);//resize callback
 	document.onkeydown = updateVelocity;
@@ -162,12 +179,14 @@ function update() { // animate
 		for (var i = 0; i < trees.length; i++) {
 			trees[i].position.z += 0.025;
 
-			if (Math.abs(trees[i].position.x - player.position.x) <= 0.75 &&
-				Math.abs(trees[i].position.z - player.position.z) <= 0.75) {
+			if (Math.abs(trees[i].position.x - player.position.x) <= 0.5 &&
+				Math.abs(trees[i].position.z - player.position.z) <= 0.5) {
 					endgame = true;
 				}
 
 			if (trees[i].position.z > 5) {
+				score++;
+				console.log(score);
 				ground.remove(trees[i]);
 				trees.shift();
 			}
@@ -186,7 +205,6 @@ function plant() {
 	var treeGeom = new THREE.ConeGeometry(0.75, 3.5, 8, 6);
 	var treeMat = new THREE.MeshStandardMaterial({ color: 0x008080, shading:THREE.FlatShading });
 	var tree = new THREE.Mesh(treeGeom, treeMat);
-	console.log("planting tree")
 	return tree;
 }
 
