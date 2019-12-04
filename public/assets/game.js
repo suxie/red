@@ -15,6 +15,7 @@ var plantRate = 600;
 var trees = [];
 var endgame = false;
 var score = 0;
+var h2;
 
 init();
 function init() {
@@ -26,17 +27,23 @@ function init() {
 }
 
 function createScene() {
-    sceneWidth = window.innerWidth;
-    sceneHeight = window.innerHeight;
-		scene = new THREE.Scene();//the 3d scene
-		scene.fog = new THREE.Fog(0x1C2F2F, -8, -20);
-    camera = new THREE.PerspectiveCamera( 75, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
-    renderer = new THREE.WebGLRenderer({alpha:true});//renderer with transparent backdrop
-    renderer.shadowMap.enabled = true;//enable shadow
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setSize( sceneWidth, sceneHeight );
-		dom = document.getElementById('gameContainer');
-		clock = new THREE.Clock();
+  sceneWidth = window.innerWidth;
+  sceneHeight = window.innerHeight;
+	scene = new THREE.Scene();//the 3d scene
+	scene.fog = new THREE.Fog(0x1C2F2F, -8, -20);
+  camera = new THREE.PerspectiveCamera( 75, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
+  renderer = new THREE.WebGLRenderer({alpha:true});//renderer with transparent backdrop
+  renderer.shadowMap.enabled = true;//enable shadow
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setSize( sceneWidth, sceneHeight );
+	dom = document.getElementById('gameContainer');
+	scorediv = document.getElementById('score');
+	h2 = document.createElement("H2");
+	var text = document.createTextNode(score);  
+	console.log(scorediv);
+	clock = new THREE.Clock();
+	h2.appendChild(text);
+	scorediv.appendChild(h2);
 	dom.appendChild(renderer.domElement);
 	
 	//add items to scene
@@ -106,22 +113,22 @@ function createScene() {
 	var ambient = new THREE.AmbientLight(0x483D8B, 0.75);
 	scene.add(ambient);
 
-	var loader = new THREE.FontLoader();
+	// var loader = new THREE.FontLoader();
 
-  loader.load( '/public/assets/helvetiker_bold.typeface.json', function ( font ) {
-		var textGeo = new THREE.TextGeometry( 'HELLO', {
-			font: font,
-			size: 80,
-			height: 5,
-			curveSegments: 12,
-			bevelEnabled: false,
-	});
-	var textMaterial = new THREE.MeshLambertMaterial();
-	var text = new THREE.Mesh(textGeo, textMaterial);
-	text.position.set(0, 0.75, 4);
-	scene.add(text);
+  // loader.load( '/public/assets/helvetiker_bold.typeface.json', function ( font ) {
+	// 	var textGeo = new THREE.TextGeometry( 'HELLO', {
+	// 		font: font,
+	// 		size: 80,
+	// 		height: 5,
+	// 		curveSegments: 12,
+	// 		bevelEnabled: false,
+	// });
+	// var textMaterial = new THREE.MeshLambertMaterial();
+	// var text = new THREE.Mesh(textGeo, textMaterial);
+	// text.position.set(0, 0.75, 4);
+	// scene.add(text);
 
-});
+// });
   	
 	window.addEventListener('resize', onWindowResize, false);//resize callback
 	document.onkeydown = updateVelocity;
@@ -148,53 +155,56 @@ function updateVelocity(keyEvent){
 }
 
 function update() { // animate
-		//update player
-		clockTick++;
-		player.position.y += 0.0003 * Math.sin(3 * clock.getElapsedTime()) + jump;
-		if (jump === 0.02 && tick < 10.0) {
-			tick++;
-		} else if (jump === 0.02) {
-			jump = -0.02;
-			tick = 0.0;
-		} else if (jump === -0.02 && tick < 10.0) {
-			tick++;
-		} else {
-			jump = 0.0;
-			tick = 0.0;
+	//update player
+	clockTick++;
+	player.position.y += 0.0003 * Math.sin(3 * clock.getElapsedTime()) + jump;
+	if (jump === 0.02 && tick < 10.0) {
+		tick++;
+	} else if (jump === 0.02) {
+		jump = -0.02;
+		tick = 0.0;
+	} else if (jump === -0.02 && tick < 10.0) {
+		tick++;
+	} else {
+		jump = 0.0;
+		tick = 0.0;
+	}
+
+	// ground.rotation.x += 0.01;
+	if (clockTick % plantRate === 0.0) {
+		if(plantRate > 400) {
+			plantRate -= 10;
+		}
+		var tree = plant();
+		tree.position.x = Math.random() * 2 - 1;
+		tree.position.y = -0.4;
+		tree.position.z = -20;
+		trees.push(tree);
+		ground.add(tree);
+	}
+
+	for (var i = 0; i < trees.length; i++) {
+		trees[i].position.z += 0.025;
+
+		if (Math.abs(trees[i].position.x - player.position.x) <= 0.5 &&
+			Math.abs(trees[i].position.z - player.position.z) <= 0.5) {
+			endgame = true;
 		}
 
-		// ground.rotation.x += 0.01;
-		if (clockTick % plantRate === 0.0) {
-			if(plantRate > 400) {
-				plantRate -= 10;
-			}
-			var tree = plant();
-			tree.position.x = Math.random() * 2 - 1;
-			tree.position.y = -0.4;
-			tree.position.z = -20;
-			trees.push(tree);
-			ground.add(tree);
+		if (trees[i].position.z > 5) {
+			score++;
+			var text = document.createTextNode(score);
+			h2.removeChild(h2.firstChild);
+			h2.appendChild(text);
+			scorediv.appendChild(h2);
+			ground.remove(trees[i]);
+			trees.shift();
 		}
+	}
+	ground.updateMatrixWorld(true);
+	box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
 
-		for (var i = 0; i < trees.length; i++) {
-			trees[i].position.z += 0.025;
-
-			if (Math.abs(trees[i].position.x - player.position.x) <= 0.5 &&
-				Math.abs(trees[i].position.z - player.position.z) <= 0.5) {
-					endgame = true;
-				}
-
-			if (trees[i].position.z > 5) {
-				score++;
-				console.log(score);
-				ground.remove(trees[i]);
-				trees.shift();
-			}
-		}
-		ground.updateMatrixWorld(true);
-		box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
-		
-		render();
+	render();
 	if (!endgame) {
 		requestAnimationFrame(update);
 	}
