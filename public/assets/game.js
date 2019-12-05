@@ -15,7 +15,10 @@ var plantRate = 600;
 var trees = [];
 var endgame = false;
 var score = 0;
-var h2;
+var scorediv;
+var scoreh2;
+var menubar;
+var screen;
 
 init();
 function init() {
@@ -38,13 +41,27 @@ function createScene() {
   renderer.setSize( sceneWidth, sceneHeight );
 	dom = document.getElementById('gameContainer');
 	scorediv = document.getElementById('score');
-	h2 = document.createElement("H2");
-	var text = document.createTextNode(score);  
-	console.log(scorediv);
+	scoreh2 = document.createElement("h2");
+	var text = document.createTextNode(score);
+	scoreh2.appendChild(text);
+	scorediv.appendChild(scoreh2);
+
+	menubar = document.getElementById('menu');
+	menubar.classList.add("pause");
+	pause = false;
 	clock = new THREE.Clock();
-	h2.appendChild(text);
-	scorediv.appendChild(h2);
 	dom.appendChild(renderer.domElement);
+
+	screen = document.getElementById('popup');
+
+	var h1 = document.createElement('h4');
+	var i1 = document.createTextNode('use Arrows to move right or left');
+	var h2 = document.createElement('h4');
+	var i2 = document.createTextNode('press Spacebar to jump');
+	h1.appendChild(i1);
+	h2.appendChild(i2);
+	screen.appendChild(h1);
+	screen.appendChild(h2);
 	
 	//add items to scene
 	var sphereGeom = new THREE.SphereGeometry(0.2, 30, 30); //sphere
@@ -99,6 +116,7 @@ function createScene() {
 	sun.position.set(0, 50, 0);
 	sun.castShadow = true;
 	scene.add(sun);
+
 	//Set up shadow properties for the sun light
 	sun.shadow.mapSize.width = 256;
 	sun.shadow.mapSize.height = 256;
@@ -113,28 +131,12 @@ function createScene() {
 	var ambient = new THREE.AmbientLight(0x483D8B, 0.75);
 	scene.add(ambient);
 
-	// var loader = new THREE.FontLoader();
-
-  // loader.load( '/public/assets/helvetiker_bold.typeface.json', function ( font ) {
-	// 	var textGeo = new THREE.TextGeometry( 'HELLO', {
-	// 		font: font,
-	// 		size: 80,
-	// 		height: 5,
-	// 		curveSegments: 12,
-	// 		bevelEnabled: false,
-	// });
-	// var textMaterial = new THREE.MeshLambertMaterial();
-	// var text = new THREE.Mesh(textGeo, textMaterial);
-	// text.position.set(0, 0.75, 4);
-	// scene.add(text);
-
-// });
-  	
 	window.addEventListener('resize', onWindowResize, false);//resize callback
 	document.onkeydown = updateVelocity;
+	document.onmousedown = menu;
 }
 
-function updateVelocity(keyEvent){
+function updateVelocity(keyEvent) {
 	var vector = new THREE.Vector3();
 	vector.project(camera);
 
@@ -149,25 +151,83 @@ function updateVelocity(keyEvent){
 		if (vector.x < sceneWidth - 100) {
 			player.position.x += 0.1;
 		}
-	} else if (keyEvent.keyCode === 32){ // spacebar jump 
+	} else if (keyEvent.keyCode === 32) { // spacebar jump 
 		jump = 0.02;
 	}
+}
+
+// play and pause
+function menu(event) {
+	if (event.clientX > 20 && event.clientX < 50 && 
+		event.clientY > 20 && event.clientY < 50) {
+			if (menubar.classList[0] === "pause") {
+				menubar.classList.remove("pause");
+				menubar.classList.add("play");
+
+				screen.classList.add("screen");
+
+				while (screen.childNodes.length > 0) {
+					screen.removeChild(screen.firstChild);
+				}
+
+				var h1 = document.createElement('h2');
+				var i1 = document.createTextNode('PAUSE');
+				var h2 = document.createElement('h5');
+				var i2 = document.createTextNode('use Arrows to move right or left');
+				var h3 = document.createElement('h5');
+				var i3 = document.createTextNode('press Spacebar to jump');
+				h1.appendChild(i1);
+				h2.appendChild(i2);
+				h3.appendChild(i3);
+				screen.appendChild(h1);
+				screen.appendChild(h2);
+				screen.appendChild(h3);
+
+				var form = document.createElement('FORM');
+				form.method = 'POST';
+				var button = document.createElement('BUTTON');
+				button.type = 'SUBMIT';
+				button.classList.add('end');
+				var exit = document.createTextNode('EXIT GAME');
+				button.appendChild(exit);
+				form.appendChild(button);
+				screen.appendChild(form);
+
+				pause = true;
+
+			} else if (menubar.classList[0] === "play") {
+				menubar.classList.remove("play");
+				menubar.classList.add("pause");
+				screen.classList.remove("screen");
+
+				while (screen.childNodes.length > 0) {
+					screen.removeChild(screen.firstChild);
+				}
+
+				pause = false;
+				requestAnimationFrame(update);
+			}			
+		}
 }
 
 function update() { // animate
 	//update player
 	clockTick++;
 	player.position.y += 0.0003 * Math.sin(3 * clock.getElapsedTime()) + jump;
-	if (jump === 0.02 && tick < 10.0) {
+	if (jump === 0.02 && tick < 12.0) {
 		tick++;
 	} else if (jump === 0.02) {
 		jump = -0.02;
 		tick = 0.0;
-	} else if (jump === -0.02 && tick < 10.0) {
+	} else if (jump === -0.02 && tick < 12.0) {
 		tick++;
 	} else {
 		jump = 0.0;
 		tick = 0.0;
+	}
+
+	while (player.position.y > 0.25 + 0.0003 * Math.sin(3 * clock.getElapsedTime()) && jump === 0.0) {
+		player.position.y = 0.25 + 0.0003 * Math.sin(3 * clock.getElapsedTime())
 	}
 
 	// ground.rotation.x += 0.01;
@@ -194,9 +254,9 @@ function update() { // animate
 		if (trees[i].position.z > 5) {
 			score++;
 			var text = document.createTextNode(score);
-			h2.removeChild(h2.firstChild);
-			h2.appendChild(text);
-			scorediv.appendChild(h2);
+			scoreh2.removeChild(scoreh2.firstChild);
+			scoreh2.appendChild(text);
+			scorediv.appendChild(scoreh2);
 			ground.remove(trees[i]);
 			trees.shift();
 		}
@@ -205,13 +265,57 @@ function update() { // animate
 	box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
 
 	render();
-	if (!endgame) {
+
+	//request next update
+	if (!endgame && !pause) {
 		requestAnimationFrame(update);
+	} else if (endgame) {
+
+		while (screen.childNodes.length > 0) {
+			screen.removeChild(screen.firstChild);
+		}
+
+		screen.classList.add('screen');
+
+		var h1 = document.createElement('h2');
+		var i1 = document.createTextNode('GAMEOVER');
+		var h2 = document.createElement('h1');
+		var i2 = document.createTextNode(score);
+		var h3 = document.createElement('h5');
+		var i3 = document.createTextNode('Enter a nickname to save score:');
+		h1.appendChild(i1);
+		h2.appendChild(i2);
+		h3.appendChild(i3);
+		screen.appendChild(h1);
+		screen.appendChild(h2);
+		screen.appendChild(h3);
+
+		var form = document.createElement('FORM');
+		form.method = 'POST';
+		var input = document.createElement('INPUT');
+		input.type = 'TEXT';
+		input.name = 'name';
+		var input2 = document.createElement('INPUT');
+		input2.type = 'hidden';
+		input2.id = 'score';
+		input2.name = 'score';
+		input2.value = score;
+		var button = document.createElement('BUTTON');
+		button.type = 'SUBMIT';
+		button.classList.add('end');
+		var exit = document.createTextNode('RESTART');
+		button.appendChild(exit);
+		form.appendChild(input);
+		form.appendChild(input2);
+		form.appendChild(button);
+		screen.appendChild(form);
 	}
-	 //request next update
 }
 
 function plant() {
+	while (screen.childNodes.length > 0) {
+		screen.removeChild(screen.firstChild);
+	}
 	var treeGeom = new THREE.ConeGeometry(0.75, 3.5, 8, 6);
 	var treeMat = new THREE.MeshStandardMaterial({ color: 0x008080, shading:THREE.FlatShading });
 	var tree = new THREE.Mesh(treeGeom, treeMat);

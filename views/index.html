@@ -19,8 +19,32 @@
 </head>
 
 <body class="background">
-	<h1> RED </h1>
-  <form method="POST">
-    <button type="submit">PLAY GAME</button>
-  </form>
+	<div class = "row">
+		<div class = "col-7">
+			<div class = "highscores">
+				<h2 style="text-align:center"> <b>HIGH SCORES</b></h2>
+				<div class="row">
+						<% if (typeof scores == 'object') { %>
+							<% var count = 0 %>
+							<% scores.forEach(function(s) { %>
+							<% if (count < 9) { %>
+							<div class="col-10"><p>&nbsp;<%= count + 1 %>. &nbsp; <%= s.scoreName %></p></div>
+							<div class="col-2" style="text-align:right"><p><%= s.highScore %></p></div>
+							<% } else if (count < 10) { %>
+								<div class="col-10"><p><%= count + 1 %>. &nbsp; <%= s.scoreName %></p></div>
+								<div class="col-2" style="text-align:right"><p><%= s.highScore %></p></div>
+							<% } %>
+							<% count++ 
+							}) 
+						} %>
+				</div>
+			</div>
+		</div>
+		<div class = "col-5">
+			<h1 class="title"> RED </h1>
+			<form method="POST">
+				<button class="enter" type="submit">PLAY GAME</button>
+			</form>
+		</div>
+	</div>
 </body>

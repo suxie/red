@@ -16,9 +16,37 @@ h1 {
 	color: #e51000;
 	font-size:10vw;
 	font-family:Montserrat;
+}
+
+.title {
 	float:right;
-	margin-right:8%;
+	margin-right:10%;
 	margin-top:5%;
+}
+
+p {
+	font-family:Quicksand;
+	color: #ffffff;
+}
+
+#gameContainer {
+	height:100vh;
+	width:100vw;
+}
+
+#popup {
+	position: absolute;
+	top:20%;
+	left:20%;
+	width:60%;
+	text-align:center;
+}
+
+.screen {
+	background-color: rgba(103, 7, 0, 0.5);
+	padding: 50px 20px;
+	border-radius: 5px;
+	z-index:3;
 }
 
 #score {
@@ -27,14 +55,90 @@ h1 {
 	top: 20px;
 }
 
+#menu {
+	position: absolute;
+	left: 20px;
+	top: 20px;
+	height:30px;
+	width:30px;
+}
+
+.pause {
+	background-image:url("pause.png");
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.play {
+	background-image:url("play.png");
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+#menu:hover {
+	cursor:pointer;
+}
+
 h2 {
+	color: #ffffff;
+	font-family: Montserrat;
+	margin-bottom:20px;
+}
+
+h3 {
+	color: #ffffff;
+	font-family: Montserrat;
+	margin-top:30px;
+}
+
+h4 {
 	color: #ffffff;
 	font-family: Montserrat;
 }
 
-button {
+h5 {
+	color: rgba(255, 255, 255, 0.6);
+	font-family: Quicksand;
+}
+
+h6 {
+	color: #ffffff;
+	font-family: Quicksand;
+}
+
+.end {
 	border:0px;
-	margin-left:75%;
+	font-family:Montserrat;
+	font-size:2vw;
+	color: #e51000;
+	background-color: rgba(103, 7, 0, 0.5);
+	margin-top:30px;
+}
+
+.end:hover {
+	cursor:pointer;
+	color:#ffffff;
+}
+
+input {
+	font-family:Quicksand;
+	display:block;
+	text-align:center;
+	margin-left:auto;
+	margin-right:auto;
+	margin-bottom:-15px;
+	margin-top:15px;
+}
+
+input:hover {
+	cursor:pointer;
+}
+
+.enter {
+	border:0px;
+	margin-left:37%;
 	margin-right:auto;
 	margin-top:10px;
 	padding:15px 25px;
@@ -51,7 +155,7 @@ button {
 	transition: opacity 0.5s ease-in-out;
 }
 
-button:hover {
+.enter:hover {
 	background-color:#db6b5c;
 	color:#670700;
 	cursor:pointer;
@@ -60,4 +164,16 @@ button:hover {
 	-moz-transition: opacity 0.5s ease-in-out;
 	-webkit-transition: opacity 0.5s ease-in-out;
 	transition: opacity 0.5s ease-in-out;
+}
+
+.highscores {
+	background-color: rgba(103, 7, 0, 0.5);
+	padding: 30px 50px;
+	border-radius: 5px;
+	max-width:500px;
+	margin-left:10%;
+}
+
+.highscores p {
+	margin-bottom:8px;
 }
