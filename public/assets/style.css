@@ -137,6 +137,7 @@ input:hover {
 }
 
 .enter {
+	cursor:pointer;
 	border:0px;
 	margin-left:37%;
 	margin-right:auto;
