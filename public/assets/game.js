@@ -33,7 +33,7 @@ function createScene() {
   sceneWidth = window.innerWidth;
   sceneHeight = window.innerHeight;
 	scene = new THREE.Scene();//the 3d scene
-	scene.fog = new THREE.FogExp2(0x3B0E69, 0.14);
+	scene.fog = new THREE.FogExp2(0x093767, 0.24);
   camera = new THREE.PerspectiveCamera( 75, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
   renderer = new THREE.WebGLRenderer({alpha:true});//renderer with transparent backdrop
   renderer.shadowMap.enabled = true;//enable shadow
@@ -101,7 +101,7 @@ function createScene() {
 	groundGeom.applyMatrix(new THREE.Matrix4().makeTranslation(0, -199.05, 0));
 	groundGeom.computeBoundingBox();
 
-	var groundMat = new THREE.MeshStandardMaterial({ color: 0x1C1D2F });
+	var groundMat = new THREE.MeshStandardMaterial({ color: 0xA8D3D6 });
 	ground = new THREE.Mesh(groundGeom, groundMat);
 	
 	box = ground.geometry.boundingBox.clone();
@@ -337,8 +337,17 @@ function plant() {
 	while (screen.childNodes.length > 0) {
 		screen.removeChild(screen.firstChild);
 	}
+
+	var shadowGeom = new THREE.SphereGeometry(0.07, 30, 30);
+	var shadowMat = new THREE.MeshBasicMaterial({ color: 0x5A7A9C });
+	var shadow = new THREE.Mesh(shadowGeom, shadowMat);
+	shadow.position.y = 0.75;
+	shadow.position.z = -0.1;
+	shadow.scale.y = 0.1;
+	shadow.scale.z = 2.5;
+
 	var trunkGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8, 8);
-	var trunkMat = new THREE.MeshPhongMaterial({ color: 0x07093D });
+	var trunkMat = new THREE.MeshPhongMaterial({ color: 0x340608 });
 	trunkMat.shininess = 0.5;
 	trunkMat.flatShading = true;
 	var trunk = new THREE.Mesh(trunkGeom, trunkMat);
@@ -360,6 +369,7 @@ function plant() {
 	top.position.y = 1.05;
 
 	var tree = new THREE.Group();
+	tree.add(shadow);
 	tree.add(trunk);
 	tree.add(bottom);
 	tree.add(middle);
