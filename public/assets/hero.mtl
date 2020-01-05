@@ -1,0 +1,21 @@
+newmtl lambert2SG
+illum 4
+Kd 0.39 0.02 0.02
+Ka 0.92 0.04 0.04
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert4SG
+illum 4
+Kd 1.00 1.00 1.00
+Ka 1.00 0.49 0.22
+Tf 1.00 1.00 1.00
+map_Kd face_color.jpg
+Ni 1.00
+newmtl phong1SG
+illum 4
+Kd 0.75 0.00 0.00
+Ka 0.29 0.01 0.01
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.29 0.01 0.01
+Ns 64.27

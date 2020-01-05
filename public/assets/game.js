@@ -11,7 +11,7 @@ var box;
 var jump = 0.0;
 var tick = 0.0;
 var clockTick = 0.0;
-var plantRate = 600;
+var plantRate = 500;
 var trees = [];
 var endgame = false;
 var score = 0;
@@ -33,7 +33,7 @@ function createScene() {
   sceneWidth = window.innerWidth;
   sceneHeight = window.innerHeight;
 	scene = new THREE.Scene();//the 3d scene
-	scene.fog = new THREE.Fog(0x1C2F2F, -8, -20);
+	scene.fog = new THREE.FogExp2(0x3B0E69, 0.14);
   camera = new THREE.PerspectiveCamera( 75, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
   renderer = new THREE.WebGLRenderer({alpha:true});//renderer with transparent backdrop
   renderer.shadowMap.enabled = true;//enable shadow
@@ -64,28 +64,47 @@ function createScene() {
 	screen.appendChild(h2);
 	
 	//add items to scene
+	var objLoader = new THREE.OBJLoader();
+	var mtlLoader = new THREE.MTLLoader();
+
+	mtlLoader.load('/public/assets/hero.mtl', function (materials) {
+		materials.preload();
+
+		objLoader.setMaterials(materials);
+		objLoader.load('/public/assets/hero.obj',	function (object) {	
+			window.player = object;
+			object.scale.x = 0.015;
+			object.scale.y = 0.015;
+			object.scale.z = 0.015;
+			object.position.z = 4.8;
+			object.position.y = 0.85;
+			object.rotation.y = Math.PI / 2;
+			object.castShadow = true;
+			object.receiveShadow = false;
+			scene.add(object);
+		})
+	})
+	
 	var sphereGeom = new THREE.SphereGeometry(0.2, 30, 30); //sphere
 	var spherePhong = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 	spherePhong.shininess = 0.5;
 	spherePhong.specular = new THREE.Color(0x87CEFA);
 	player = new THREE.Mesh(sphereGeom, spherePhong);
-	player.castShadow = true;
-	player.receiveShadow = false;
-	player.position.y = 0.25;
-	player.position.z = 4.0;
-	scene.add(player);
+	// player.castShadow = true;
+	// player.receiveShadow = false;
+	// player.position.y = 0.25;
+	// scene.add(player);
 
-	var groundGeom = new THREE.CylinderGeometry(5, 5, sceneWidth);
+	var groundGeom = new THREE.CylinderGeometry(200, 200, sceneWidth);
 	groundGeom.rotateZ(Math.PI / 2.0);
-	groundGeom.applyMatrix(new THREE.Matrix4().makeTranslation(0, -4.1, 1));
+	groundGeom.scale(1.0, 1.0, 10.0);
+	groundGeom.applyMatrix(new THREE.Matrix4().makeTranslation(0, -199.05, 0));
 	groundGeom.computeBoundingBox();
 
-	// groundGeom.applyMatrix(new THREE.Matrix4().makeTranslation(0, -4.1, 1));
 	var groundMat = new THREE.MeshStandardMaterial({ color: 0x1C1D2F });
 	ground = new THREE.Mesh(groundGeom, groundMat);
 	
 	box = ground.geometry.boundingBox.clone();
-	box.center(ground.geometry.position); // this re-sets the mesh position
 	ground.receiveShadow = true;
 	ground.castShadow = false;
 	ground.rotation.Z = Math.PI / 2.0;
@@ -98,7 +117,7 @@ function createScene() {
 	var skyGrad = new THREE.Mesh(skyGradGeom, skyMat);
 	skyGrad.receiveShadow = false;
 	skyGrad.castShadow=false;
-	scene.add(skyGrad);
+	// scene.add(skyGrad);
 
 	var horizonGeom = new THREE.PlaneGeometry(sceneWidth * 10, sceneHeight * 0.05);
 	horizonGeom.translate(0, 0, -sceneWidth);
@@ -107,7 +126,7 @@ function createScene() {
 	var horizon = new THREE.Mesh(horizonGeom, horizonMat);
 	horizon.receiveShadow = false;
 	horizon.castShadow=false;
-	scene.add(horizon);
+	// scene.add(horizon);
 
 	camera.position.z = 5;
 	camera.position.y = 1;
@@ -144,15 +163,17 @@ function updateVelocity(keyEvent) {
 	vector.y = -(player.position.y * sceneHeight / 2.0 ) + sceneHeight / 2.0;
 
 	if (keyEvent.keyCode === 37) { // left arrow
-		if (vector.x > 100) {
-			player.position.x -= 0.1;
+		console.log(vector.x + ' of ' + sceneWidth);
+		if (vector.x > sceneWidth * 0.41) {
+			player.position.x -= 0.015;
 		}
 	} else if (keyEvent.keyCode === 39) { // right arrow
-		if (vector.x < sceneWidth - 100) {
-			player.position.x += 0.1;
+		console.log(vector.x + ' of ' + sceneWidth);
+		if (vector.x < sceneWidth - sceneWidth * 0.41) {
+			player.position.x += 0.015;
 		}
 	} else if (keyEvent.keyCode === 32) { // spacebar jump 
-		jump = 0.02;
+		jump = 0.005;
 	}
 }
 
@@ -213,41 +234,41 @@ function menu(event) {
 function update() { // animate
 	//update player
 	clockTick++;
-	player.position.y += 0.0003 * Math.sin(3 * clock.getElapsedTime()) + jump;
-	if (jump === 0.02 && tick < 12.0) {
+	player.position.y += 0.00007 * Math.sin(3 * clock.getElapsedTime()) + jump;
+	if (jump === 0.005 && tick < 12.0) {
 		tick++;
-	} else if (jump === 0.02) {
-		jump = -0.02;
+	} else if (jump === 0.005) {
+		jump = -0.005;
 		tick = 0.0;
-	} else if (jump === -0.02 && tick < 12.0) {
+	} else if (jump === -0.005 && tick < 12.0) {
 		tick++;
 	} else {
 		jump = 0.0;
 		tick = 0.0;
 	}
 
-	while (player.position.y > 0.25 + 0.0003 * Math.sin(3 * clock.getElapsedTime()) && jump === 0.0) {
-		player.position.y = 0.25 + 0.0003 * Math.sin(3 * clock.getElapsedTime())
+	while (player.position.y > 0.85 + 0.00007 * Math.sin(3 * clock.getElapsedTime()) && jump === 0.0) {
+		player.position.y = 0.85 + 0.00007 * Math.sin(3 * clock.getElapsedTime())
 	}
 
 	// ground.rotation.x += 0.01;
 	if (clockTick % plantRate === 0.0) {
-		if(plantRate > 400) {
+		if(plantRate > 200) {
 			plantRate -= 10;
 		}
 		var tree = plant();
-		tree.position.x = Math.random() * 2 - 1;
-		tree.position.y = -0.4;
-		tree.position.z = -20;
+		tree.position.x = Math.random() * 0.3 - 0.15;
+		tree.position.y = 0.1;
+		tree.position.z = -10;
 		trees.push(tree);
 		ground.add(tree);
 	}
 
 	for (var i = 0; i < trees.length; i++) {
-		trees[i].position.z += 0.025;
+		trees[i].position.z += 0.015;
 
-		if (Math.abs(trees[i].position.x - player.position.x) <= 0.5 &&
-			Math.abs(trees[i].position.z - player.position.z) <= 0.5) {
+		if (Math.abs(trees[i].position.x - player.position.x) <= 0.09 &&
+			Math.abs(trees[i].position.z - player.position.z) <= 0.09) {
 			endgame = true;
 		}
 
@@ -316,9 +337,34 @@ function plant() {
 	while (screen.childNodes.length > 0) {
 		screen.removeChild(screen.firstChild);
 	}
-	var treeGeom = new THREE.ConeGeometry(0.75, 3.5, 8, 6);
-	var treeMat = new THREE.MeshStandardMaterial({ color: 0x008080, shading:THREE.FlatShading });
-	var tree = new THREE.Mesh(treeGeom, treeMat);
+	var trunkGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8, 8);
+	var trunkMat = new THREE.MeshPhongMaterial({ color: 0x07093D });
+	trunkMat.shininess = 0.5;
+	trunkMat.flatShading = true;
+	var trunk = new THREE.Mesh(trunkGeom, trunkMat);
+	trunk.position.y = 0.8;
+
+	var bottomGeom = new THREE.ConeGeometry(0.1, 0.15, 12, 6);
+	var treeMat = new THREE.MeshPhongMaterial({ color: 0x008080 });
+	treeMat.shininess = 0.7;
+	treeMat.flatShading = true;
+	var bottom = new THREE.Mesh(bottomGeom, treeMat);
+	bottom.position.y = 0.9;
+
+	var midGeom = new THREE.ConeGeometry(0.08, 0.15, 10, 6);
+	var middle = new THREE.Mesh(midGeom, treeMat);
+	middle.position.y = 0.99;
+
+	var topGeom = new THREE.ConeGeometry(0.06, 0.1, 9, 6);
+	var top = new THREE.Mesh(topGeom, treeMat);
+	top.position.y = 1.05;
+
+	var tree = new THREE.Group();
+	tree.add(trunk);
+	tree.add(bottom);
+	tree.add(middle);
+	tree.add(top);
+	tree.castShadow = true;
 	return tree;
 }
 

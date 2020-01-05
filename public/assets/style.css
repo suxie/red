@@ -1,7 +1,7 @@
 .background {
-	margin-top:15vh;
-	background-image:url("background.jpg");
-	background-position: center;
+	padding-top:15vh;
+	background-image:url("combined3.jpg");
+	background-position: left 70%;
   background-size: cover;
   height:100vh;
   background-repeat: no-repeat;
@@ -137,7 +137,6 @@ input:hover {
 }
 
 .enter {
-	cursor:pointer;
 	border:0px;
 	margin-left:37%;
 	margin-right:auto;
@@ -168,10 +167,10 @@ input:hover {
 }
 
 .highscores {
-	background-color: rgba(103, 7, 0, 0.5);
+	background-color: rgba(6, 15, 48, 0.6);
 	padding: 30px 50px;
 	border-radius: 5px;
-	max-width:500px;
+	max-width:400px;
 	margin-left:10%;
 }
 
