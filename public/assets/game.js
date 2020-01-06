@@ -12,7 +12,10 @@ var jump = 0.0;
 var tick = 0.0;
 var clockTick = 0.0;
 var plantRate = 500;
+var rockRate = 621;
+var rocks = [];
 var trees = [];
+var forest = [];
 var endgame = false;
 var score = 0;
 var scorediv;
@@ -163,17 +166,15 @@ function updateVelocity(keyEvent) {
 	vector.y = -(player.position.y * sceneHeight / 2.0 ) + sceneHeight / 2.0;
 
 	if (keyEvent.keyCode === 37) { // left arrow
-		console.log(vector.x + ' of ' + sceneWidth);
 		if (vector.x > sceneWidth * 0.41) {
 			player.position.x -= 0.015;
 		}
 	} else if (keyEvent.keyCode === 39) { // right arrow
-		console.log(vector.x + ' of ' + sceneWidth);
 		if (vector.x < sceneWidth - sceneWidth * 0.41) {
 			player.position.x += 0.015;
 		}
 	} else if (keyEvent.keyCode === 32) { // spacebar jump 
-		jump = 0.005;
+		jump = 0.006;
 	}
 }
 
@@ -181,7 +182,7 @@ function updateVelocity(keyEvent) {
 function menu(event) {
 	if (event.clientX > 20 && event.clientX < 50 && 
 		event.clientY > 20 && event.clientY < 50) {
-			if (menubar.classList[0] === "pause") {
+			if (menubar.classList[0] === "pause" && !endgame) {
 				menubar.classList.remove("pause");
 				menubar.classList.add("play");
 
@@ -235,23 +236,24 @@ function update() { // animate
 	//update player
 	clockTick++;
 	player.position.y += 0.00007 * Math.sin(3 * clock.getElapsedTime()) + jump;
-	if (jump === 0.005 && tick < 12.0) {
+	if (jump === 0.006 && tick < 25.0) {
 		tick++;
-	} else if (jump === 0.005) {
-		jump = -0.005;
+	} else if (jump === 0.006) {
+		jump = -0.006;
 		tick = 0.0;
-	} else if (jump === -0.005 && tick < 12.0) {
+	} else if (jump === -0.006 && tick < 25.0) {
 		tick++;
 	} else {
 		jump = 0.0;
 		tick = 0.0;
 	}
 
+	// bring player back to correct height
 	while (player.position.y > 0.85 + 0.00007 * Math.sin(3 * clock.getElapsedTime()) && jump === 0.0) {
 		player.position.y = 0.85 + 0.00007 * Math.sin(3 * clock.getElapsedTime())
 	}
 
-	// ground.rotation.x += 0.01;
+	// generate trees
 	if (clockTick % plantRate === 0.0) {
 		if(plantRate > 200) {
 			plantRate -= 10;
@@ -264,6 +266,35 @@ function update() { // animate
 		ground.add(tree);
 	}
 
+	// generate rocks
+	if (clockTick % rockRate === 0.0) {
+		if (rockRate > 300) {
+			rockRate -= 10;
+		}
+		var rock = genRock();
+		rock.position.x = Math.random() * 0.3 - 0.15;
+		rock.position.y = 1.07;
+		rock.position.z = -10;
+		rocks.push(rock);
+		ground.add(rock);
+	}
+
+	// generate forest 
+	if (clockTick % 10 === 0.0) {
+		var trunk = genForest();
+		var left = Math.random();
+		if (left < 0.5) {
+			trunk.position.x = Math.random() * -2 - 0.5;
+		} else {
+			trunk.position.x = Math.random() * 2 + 0.5;
+		}
+		trunk.position.y = 0.1;
+		trunk.position.z = -10;
+		forest.push(trunk);
+		ground.add(trunk);
+	}
+
+	// update trees
 	for (var i = 0; i < trees.length; i++) {
 		trees[i].position.z += 0.015;
 
@@ -282,6 +313,34 @@ function update() { // animate
 			trees.shift();
 		}
 	}
+
+	// update rocks
+	for (var i = 0; i < rocks.length; i++) {
+		rocks[i].position.z += 0.015;
+		rocks[i].position.y -= 0.0003;
+
+		if (Math.abs(rocks[i].position.x - player.position.x) <= 0.05 &&
+			Math.abs(rocks[i].position.z - player.position.z) <= 0.05 && 
+			player.position.y <= 0.89) {
+			endgame = true;
+		}
+
+		if (rocks[i].position.z > 5) {
+			ground.remove(rocks[i]);
+			rocks.shift();
+		}
+	}
+
+	// update forest
+	for (var i = 0; i < forest.length; i++) {
+		forest[i].position.z += 0.015;
+
+		if (forest[i].position.z > 5) {
+			ground.remove(forest[i]);
+			forest.shift();
+		}
+	}
+
 	ground.updateMatrixWorld(true);
 	box.copy(ground.geometry.boundingBox).applyMatrix4(ground.matrixWorld);
 
@@ -333,6 +392,7 @@ function update() { // animate
 	}
 }
 
+// generates trees for player to avoid
 function plant() {
 	while (screen.childNodes.length > 0) {
 		screen.removeChild(screen.firstChild);
@@ -342,7 +402,7 @@ function plant() {
 	var shadowMat = new THREE.MeshBasicMaterial({ color: 0x5A7A9C });
 	var shadow = new THREE.Mesh(shadowGeom, shadowMat);
 	shadow.position.y = 0.75;
-	shadow.position.z = -0.1;
+	shadow.position.z = -0.15;
 	shadow.scale.y = 0.1;
 	shadow.scale.z = 2.5;
 
@@ -378,7 +438,47 @@ function plant() {
 	return tree;
 }
 
-function render(){
+// generates rocks
+function genRock() {
+	var rockGeom = new THREE.SphereGeometry(0.07, 5, 3);
+	var rockMat = new THREE.MeshPhongMaterial({ color: 0x3C447C });
+	rockMat.shininess = 0.3;
+	rockMat.flatShading = true;
+	var rock = new THREE.Mesh(rockGeom, rockMat);
+	rock.scale.y = 0.7;
+
+	rock.castShadow = true;
+	return rock;
+}
+
+// generates forest
+function genForest() {
+
+	var bottomGeom = new THREE.ConeGeometry(0.1, 0.35, 10, 6);
+	var treeMat = new THREE.MeshPhongMaterial({ color: 0x013636 });
+	treeMat.shininess = 0.7;
+	treeMat.flatShading = true;
+	var bottom = new THREE.Mesh(bottomGeom, treeMat);
+	bottom.position.y = 0.9;
+
+	var midGeom = new THREE.ConeGeometry(0.08, 0.35, 9, 6);
+	var middle = new THREE.Mesh(midGeom, treeMat);
+	middle.position.y = 1.1 + Math.random() * 0.05 - 0.025;
+
+	var topGeom = new THREE.ConeGeometry(0.06, 0.2, 8, 6);
+	var top = new THREE.Mesh(topGeom, treeMat);
+	top.position.y = 1.2 + + Math.random() * 0.1 - 0.05;
+
+	var tree = new THREE.Group();
+	tree.add(bottom);
+	tree.add(middle);
+	tree.add(top);
+	tree.castShadow = true;
+	tree.rotation.y = Math.random();
+	return tree;
+}
+
+function render() {
 		renderer.setClearColor(0x13134B, 1);
     renderer.render(scene, camera); //draw
 }
