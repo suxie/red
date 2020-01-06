@@ -174,7 +174,7 @@ function updateVelocity(keyEvent) {
 			player.position.x += 0.015;
 		}
 	} else if (keyEvent.keyCode === 32) { // spacebar jump 
-		jump = 0.006;
+		jump = 0.005;
 	}
 }
 
@@ -236,12 +236,12 @@ function update() { // animate
 	//update player
 	clockTick++;
 	player.position.y += 0.00007 * Math.sin(3 * clock.getElapsedTime()) + jump;
-	if (jump === 0.006 && tick < 25.0) {
+	if (jump === 0.005 && tick < 25.0) {
 		tick++;
-	} else if (jump === 0.006) {
-		jump = -0.006;
+	} else if (jump === 0.005) {
+		jump = -0.005;
 		tick = 0.0;
-	} else if (jump === -0.006 && tick < 25.0) {
+	} else if (jump === -0.005 && tick < 25.0) {
 		tick++;
 	} else {
 		jump = 0.0;
@@ -321,7 +321,7 @@ function update() { // animate
 
 		if (Math.abs(rocks[i].position.x - player.position.x) <= 0.05 &&
 			Math.abs(rocks[i].position.z - player.position.z) <= 0.05 && 
-			player.position.y <= 0.89) {
+			player.position.y <= 0.88) {
 			endgame = true;
 		}
 
